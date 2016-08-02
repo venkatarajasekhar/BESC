@@ -1,5 +1,6 @@
 # BESC
-*32-bit ARM-based ESC __firmware__ for Brushed DC Motors*
+~~*32-bit ARM-based ESC __firmware__ for Brushed DC Motors*~~
+Well, at this moment, this project just make a single LED bink.
 
 ## Summary of this project
 This project is a part of a project which intends to create a generic ESC for various types of brushed DC motors.  
