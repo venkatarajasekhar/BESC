@@ -250,3 +250,13 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+/Libraries
+/BESC/BESC/main.o
+/BESC/BESC/main.d
+/BESC/BESC/Interrupt.o
+/BESC/BESC/Interrupt.d
+/BESC/BESC/Init.o
+/BESC/BESC/Init.d
+/BESC/BESC/BESC.hex
+/BESC/BESC/BESC.elf
+/BESC/BESC/BESC.bin

@@ -12,12 +12,17 @@ void Init::PinMux_Init(void)
 	// Set PTB1 (pin 13) as LPUART_TX, PTB2 (pin 14) as RX
 	PORT_SetPinMux(PORTB, 1U, kPORT_MuxAlt2);
 	PORT_SetPinMux(PORTB, 2U, kPORT_MuxAlt2);
+
+	// Set PTB1 (pin 13) as LPUART_TX, PTB2 (pin 14) as RX
+	PORT_SetPinMux(PORTB, 10U, kPORT_MuxAlt2);
+	PORT_SetPinMux(PORTB, 11U, kPORT_MuxAlt2);
+
+
 }
 
 void Init::LPUART0_Init(void)
 {
 	lpuart_config_t config;
-
 	CLOCK_SetLpuart0Clock(0x1U);
 	//CLOCK_EnableClock(kCLOCK_Lpuart0);
 	/*
@@ -34,7 +39,49 @@ void Init::LPUART0_Init(void)
 	config.enableTx = true;
 	config.enableRx = true;
 
-	LPUART_Init(LPUART0, &config, CLOCK_GetFreq(clock_name_t::kCLOCK_McgPeriphClk));
+	LPUART_Init(LPUART0, &config, CLOCK_GetPeriphClkFreq());
+}
+
+void Init::TPM0_Init(void)
+{
+	tpm_config_t tpmInfo;
+	uint8_t updatedDutycycle = 0U;
+	tpm_chnl_pwm_signal_param_t tpmParam[2];
+
+	/* Configure tpm params with frequency 24kHZ */
+	tpmParam[0].chnlNumber = tpm_chnl_t::kTPM_Chnl_0;
+	tpmParam[0].level = kTPM_LowTrue;
+	tpmParam[0].dutyCyclePercent = 0U;
+
+	tpmParam[1].chnlNumber = tpm_chnl_t::kTPM_Chnl_1;
+	tpmParam[1].level = kTPM_LowTrue;
+	tpmParam[1].dutyCyclePercent = 0U;
+
+	/* Board pin, clock, debug console init */
+	//BOARD_InitPins();
+	//BOARD_BootClockRUN();
+	//BOARD_InitDebugConsole();
+	/* Select the clock source for the TPM counter as MCG IRC48M clock */
+	CLOCK_SetTpmClock(1U);
+
+	/*
+	* tpmInfo.prescale = kTPM_Prescale_Divide_1;
+	* tpmInfo.useGlobalTimeBase = false;
+	* tpmInfo.enableDoze = false;
+	* tpmInfo.enableDebugMode = false;
+	* tpmInfo.enableReloadOnTrigger = false;
+	* tpmInfo.enableStopOnOverflow = false;
+	* tpmInfo.enableStartOnTrigger = false;
+	* tpmInfo.enablePauseOnTrigger = false;
+	* tpmInfo.triggerSelect = kTPM_Trigger_Select_0;
+	* tpmInfo.triggerSource = kTPM_TriggerSource_External;
+	*/
+	TPM_GetDefaultConfig(&tpmInfo);
+	/* Initialize TPM module */
+	TPM_Init(TPM0, &tpmInfo);
+
+	TPM_SetupPwm(TPM0, tpmParam, 2U, kTPM_EdgeAlignedPwm, 24000U, CLOCK_GetPeriphClkFreq());
+	TPM_StartTimer(TPM0, tpm_clock_source_t::kTPM_SystemClock);
 }
 
 void Init::Clock_init(void)

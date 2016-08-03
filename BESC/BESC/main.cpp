@@ -15,6 +15,8 @@ void delay(void)
 */
 int main(void)
 {
+	bool brightnessUp = true; /* Indicate LED is brighter or dimmer */
+	uint8_t updatedDutycycle = 0U;
 
 	/* Define the init structure for the output LED pin*/
 	gpio_pin_config_t led_config = {
@@ -24,6 +26,33 @@ int main(void)
 	Init::Clock_init();
 	Init::PinMux_Init();
 	Init::LPUART0_Init();
+	Init::TPM0_Init();
+
+	while (1)
+	{
+		/* Delay to see the change of LED brightness */
+		delay();
+
+		if (brightnessUp)
+		{
+			/* Increase duty cycle until it reach limited value */
+			if (++updatedDutycycle == 100U)
+			{
+				brightnessUp = false;
+			}
+		}
+		else
+		{
+			/* Decrease duty cycle until it reach limited value */
+			if (--updatedDutycycle == 0U)
+			{
+				brightnessUp = true;
+			}
+		}
+		/* Start PWM mode with updated duty cycle */
+		TPM_UpdatePwmDutycycle(TPM0, tpm_chnl_t::kTPM_Chnl_0, tpm_pwm_mode_t::kTPM_CenterAlignedPwm, updatedDutycycle);
+		TPM_UpdatePwmDutycycle(TPM0, tpm_chnl_t::kTPM_Chnl_1, tpm_pwm_mode_t::kTPM_CenterAlignedPwm, updatedDutycycle);
+	}
 
 	/* Init output LED GPIO. */
 	GPIO_PinInit(GPIOA, 6U, &led_config);
