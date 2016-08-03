@@ -45,6 +45,7 @@
     <NMakeReBuildCommandLine>make clean all</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>_DEBUG;__GNUC__;$(NMakePreprocessorDefinitions);CPU_MKL03Z16VFK4</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>./;..\..\Libraries\CMSIS\Include\;..\..\Libraries\devices\;..\..\Libraries\devices\MKL03Z4\;..\..\Libraries\devices\MKL03Z4\drivers\;..\..\Libraries\devices\MKL03Z4\utilities;C:\Program Files (x86)\GNU Tools ARM Embedded\5.3 2016q1\arm-none-eabi\include</NMakeIncludeSearchPath>
+    <SourcePath>$(VC_SourcePath);..\..\Libraries\devices\MKL03Z4\drivers\</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <NMakeBuildCommandLine>make all</NMakeBuildCommandLine>
@@ -60,12 +61,19 @@
     <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="flash.bat" />
+    <None Include="flash.jlink" />
     <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Init.cpp" />
+    <ClCompile Include="Interrupt.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="fsl_incl.h" />
+    <ClInclude Include="Init.h" />
+    <ClInclude Include="Interrupt.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

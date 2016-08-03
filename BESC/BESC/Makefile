@@ -4,7 +4,7 @@
 GCC_BIN = "C:/Program Files (x86)/GNU Tools ARM Embedded/5.3 2016q1/bin/"
 
 PROJECT = BESC
-OBJECTS = ./main.o
+OBJECTS =  ./Init.o ./main.o ./Interrupt.o
 SYS_OBJECTS = ../../Libraries/devices/MKL03Z4/gcc/startup_MKL03Z4.o ../../Libraries/devices/MKL03Z4/system_MKL03Z4.o
 _STDPERIPHDRVR_OBJECTS = fsl_adc16.o fsl_clock.o fsl_cmp.o fsl_common.o fsl_cop.o fsl_flash.o fsl_gpio.o fsl_i2c.o fsl_llwu.o \
 						fsl_lptmr.o fsl_lpuart.o fsl_pmc.o fsl_rcm.o fsl_rtc.o fsl_sim.o fsl_smc.o fsl_spi.o fsl_tpm.o fsl_vref.o 
@@ -45,7 +45,7 @@ else
   CC_FLAGS += -DNDEBUG -Os
 endif
 
-.PHONY: all clean lst size
+.PHONY: all clean lst size flash
 
 all: $(PROJECT).bin $(PROJECT).hex size
 
@@ -87,6 +87,10 @@ lst: $(PROJECT).lst
 
 size: $(PROJECT).elf
 	$(SIZE) $(PROJECT).elf
+
+flash: 
+	"C:\Program Files (x86)\SEGGER\JLink_V600d\JLink.exe" -Device MKL03Z16XXX4 -CommandFile .\flash.jlink
+	
 
 DEPS = $(OBJECTS:.o=.d) $(SYS_OBJECTS:.o=.d) $(STDPERIPHDRVR_OBJECTS:.o=.d)
 -include $(DEPS)

@@ -15,19 +15,25 @@ void delay(void)
 */
 int main(void)
 {
+
 	/* Define the init structure for the output LED pin*/
 	gpio_pin_config_t led_config = {
 		kGPIO_DigitalOutput, 0,
 	};
 
-	/* Board pin, clock, debug console init */
-    /* Debug uart port mux config */
-    /* Enable uart port clock */
-    CLOCK_EnableClock(kCLOCK_PortA);
-	PORT_SetPinMux(PORTA, 6U, kPORT_MuxAsGpio);
+	Init::Clock_init();
+	Init::PinMux_Init();
+	Init::LPUART0_Init();
 
 	/* Init output LED GPIO. */
 	GPIO_PinInit(GPIOA, 6U, &led_config);
+	GPIO_TogglePinsOutput(GPIOA, 1u << 6);
+	delay();
+	GPIO_TogglePinsOutput(GPIOA, 1u << 6);
+
+	/* Enable RX interrupt. */
+	LPUART_EnableInterrupts(LPUART0, kLPUART_RxDataRegFullInterruptEnable);
+	EnableIRQ(IRQn::LPUART0_IRQn);
 
 	while (1)
 	{
