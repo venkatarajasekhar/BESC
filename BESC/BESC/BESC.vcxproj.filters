@@ -43,7 +43,7 @@
     <ClInclude Include="Interrupt.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="fsl_incl.h">
+    <ClInclude Include="Includes.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

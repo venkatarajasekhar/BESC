@@ -5,3 +5,8 @@
 #include "fsl_port.h"
 #include "fsl_lpuart.h"
 #include "fsl_tpm.h"
+
+
+
+extern volatile bool InitCompleted;
+

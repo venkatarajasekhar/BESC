@@ -10,6 +10,8 @@ _STDPERIPHDRVR_OBJECTS = fsl_adc16.o fsl_clock.o fsl_cmp.o fsl_common.o fsl_cop.
 						fsl_lptmr.o fsl_lpuart.o fsl_pmc.o fsl_rcm.o fsl_rtc.o fsl_sim.o fsl_smc.o fsl_spi.o fsl_tpm.o fsl_vref.o 
 						# fsl_i2c_freertos.o fsl_lpuart_freertos.o fsl_spi_freertos.o 
 STDPERIPHDRVR_OBJECTS = $(addprefix ../../Libraries/devices/MKL03Z4/drivers/,$(_STDPERIPHDRVR_OBJECTS))
+_FSL_UTIL_OBJECTS = fsl_debug_console.o fsl_notifier.o fsl_sbrk.o fsl_shell.o
+FSL_UTIL_OBJECTS = $(addprefix ../../Libraries/devices/MKL03Z4/utilities/,$(_FSL_UTIL_OBJECTS))
 INCLUDE_PATHS = -I. -I../../Libraries -I../../Libraries/CMSIS/Include -I../../Libraries/devices/MKL03Z4/ \
 						-I../../Libraries/devices/MKL03Z4/drivers/ -I../../Libraries/devices/MKL03Z4/utilities/
 LINKER_SCRIPT = ../../Libraries/devices/MKL03Z4/gcc/MKL03Z16xxx4_flash.ld
@@ -27,19 +29,22 @@ SIZE    = $(GCC_BIN)arm-none-eabi-size
 
 COMMON_FLAGS = -mcpu=cortex-m0plus -mthumb -mfloat-abi=soft -g -Wall -fno-common -ffunction-sections -fdata-sections -ffreestanding -fno-builtin -mapcs 
 
-ASM_FLAGS = $(COMMON_FLAGS) -D__STARTUP_CLEAR_BSS
+ASM_FLAGS := -DDEBUG -D__STARTUP_CLEAR_BSS -g -mcpu=cortex-m0plus -Wall -mfloat-abi=soft -mthumb -fno-common -ffunction-sections -fdata-sections -ffreestanding -fno-builtin -mapcs -std=gnu99
+#ASM_FLAGS = $(COMMON_FLAGS) -D__STARTUP_CLEAR_BSS
 
-#CC_FLAGS = $(COMMON_FLAGS) -c -g -fno-common -fmessage-length=0 -Wall -Wextra -fno-exceptions -ffunction-sections -fdata-sections -fomit-frame-pointer -MMD -MP
-CC_FLAGS = $(COMMON_FLAGS) -c -MMD -MP $(LD_SYS_LIBS)
-CC_SYMBOLS = -DTOOLCHAIN_GCC_ARM -DCPU_MKL03Z32VFK4 -DFRDM_KL03Z -DFREEDOM
+CC_FLAGS := -DDEBUG -DCPU_MKL03Z32VFK4 -DFRDM_KL03Z -DFREEDOM -g -O0 -mcpu=cortex-m0plus -Wall -mfloat-abi=soft -mthumb -MMD -MP -fno-common -ffunction-sections -fdata-sections -ffreestanding -fno-builtin -mapcs
+#CC_FLAGS = $(COMMON_FLAGS) -c -MMD -MP $(LD_SYS_LIBS)
+#CC_SYMBOLS = -DTOOLCHAIN_GCC_ARM -DCPU_MKL03Z32VFK4 -DFRDM_KL03Z -DFREEDOM
 
-LD_FLAGS = $(COMMON_FLAGS) -Xlinker --gc-sections -Xlinker -static -Xlinker -z -Xlinker muldefs --specs=nano.specs 
+LD_FLAGS := -g -mcpu=cortex-m0plus -Wall -mfloat-abi=soft --specs=nano.specs -fno-common -ffunction-sections -fdata-sections -ffreestanding -fno-builtin -mthumb -mapcs -Xlinker --gc-sections -Xlinker -static -Xlinker -z -Xlinker muldefs
+#LD_FLAGS = $(COMMON_FLAGS) -Xlinker --gc-sections -Xlinker -static -Xlinker -z -Xlinker muldefs --specs=nano.specs 
 LD_SYS_LIBS = -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 
+DEBUG := 1
 
 ifeq ($(DEBUG), 1)
-  ASM_FLAGS += -DDEBUG
-  CC_FLAGS += -DDEBUG -O0
+#  ASM_FLAGS += -DDEBUG -D_DEBUG
+#  CC_FLAGS += -DDEBUG -D_DEBUG -O0
 else
   ASM_FLAGS += -DNDEBUG
   CC_FLAGS += -DNDEBUG -Os
@@ -52,7 +57,7 @@ all: $(PROJECT).bin $(PROJECT).hex size
 
 clean:
 	rm -f $(PROJECT).bin $(PROJECT).elf $(PROJECT).hex $(PROJECT).map $(PROJECT).lst $(OBJECTS) $(DEPS)
-# rm -f $(PROJECT).bin $(PROJECT).elf $(PROJECT).hex $(PROJECT).map $(PROJECT).lst $(OBJECTS) $(STDPERIPHDRVR_OBJECTS) $(DEPS)
+# rm -f $(PROJECT).bin $(PROJECT).elf $(PROJECT).hex $(PROJECT).map $(PROJECT).lst $(OBJECTS) $(DEPS) $(STDPERIPHDRVR_OBJECTS) $(FSL_UTIL_OBJECTS)
 
 
 .asm.o:
@@ -63,15 +68,17 @@ clean:
 	$(CC) $(ASM_FLAGS) -c -x assembler-with-cpp -o $@ $<
 
 .c.o:
-	$(CC)  $(CC_FLAGS) $(CC_SYMBOLS) -std=gnu99   $(INCLUDE_PATHS) -o $@ $<
+	$(CC)  $(CC_FLAGS) -c -std=gnu99 $(INCLUDE_PATHS) -o $@ $<
+#	$(CC)  $(CC_FLAGS) $(CC_SYMBOLS) -std=gnu99   $(INCLUDE_PATHS) -o $@ $<
 
 .cpp.o:
-	$(CPP) $(CC_FLAGS) $(CC_SYMBOLS) -std=gnu++11 -fno-rtti $(INCLUDE_PATHS) -o $@ $<
+	$(CPP) $(CC_FLAGS) -c $(LD_SYS_LIBS) -std=gnu++11 $(INCLUDE_PATHS) -o $@ $<
+#	$(CPP) $(CC_FLAGS) $(CC_SYMBOLS) -std=gnu++11 -fno-rtti $(INCLUDE_PATHS) -o $@ $<
 
 
 
-$(PROJECT).elf: $(OBJECTS) $(SYS_OBJECTS) $(STDPERIPHDRVR_OBJECTS) 
-	$(LD) $(LD_FLAGS) -T$(LINKER_SCRIPT) $(LIBRARY_PATHS) -o $@ $^ $(LIBRARIES) $(LD_SYS_LIBS) $(LIBRARIES) $(LD_SYS_LIBS)
+$(PROJECT).elf: $(OBJECTS) $(SYS_OBJECTS) $(STDPERIPHDRVR_OBJECTS) $(FSL_UTIL_OBJECTS)
+	$(LD) $(LD_FLAGS) -T$(LINKER_SCRIPT) -static $(LIBRARY_PATHS) -o $@ $^ $(LIBRARIES) $(LD_SYS_LIBS) $(LIBRARIES) $(LD_SYS_LIBS)
 
 
 $(PROJECT).bin: $(PROJECT).elf
@@ -92,7 +99,7 @@ flash:
 	"C:\Program Files (x86)\SEGGER\JLink_V600d\JLink.exe" -Device MKL03Z16XXX4 -CommandFile .\flash.jlink
 	
 
-DEPS = $(OBJECTS:.o=.d) $(SYS_OBJECTS:.o=.d) $(STDPERIPHDRVR_OBJECTS:.o=.d)
+DEPS = $(OBJECTS:.o=.d) $(SYS_OBJECTS:.o=.d) $(STDPERIPHDRVR_OBJECTS:.o=.d) $(FSL_UTIL_OBJECTS:.o=.d)
 -include $(DEPS)
 
 

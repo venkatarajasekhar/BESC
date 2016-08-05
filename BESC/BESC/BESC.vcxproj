@@ -71,7 +71,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="fsl_incl.h" />
+    <ClInclude Include="Includes.h" />
     <ClInclude Include="Init.h" />
     <ClInclude Include="Interrupt.h" />
     <ClInclude Include="main.h" />
