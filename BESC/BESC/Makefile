@@ -5,22 +5,21 @@ GCC_BIN := C:/Program Files (x86)/GNU Tools ARM Embedded/5.3 2016q1/bin/
 
 PROJECT := BESC
 
-_OBJ := main.o init.o interrupt.o motor.o
+_OBJ := main.o init.o stm32f10x_it.o motor.o
 OBJ := $(addprefix ./obj/,$(_OBJ))
 
-_SYS_OBJ := startup_stm32f30x.o system_stm32f30x.o
-SYS_OBJ := $(addprefix ../../Libraries/STM32F30x/CMSIS/Device/ST/STM32F30x/Source/,$(_SYS_OBJ))
+_SYS_OBJ := startup/gcc_ride7/startup_stm32f10x_md.o system_stm32f10x.o
+SYS_OBJ := $(addprefix ../../Libraries/STM32F10x/CMSIS/CM3/DeviceSupport/ST/STM32F10x/,$(_SYS_OBJ))
 
-_DRVR_OBJ := stm32f30x_adc.o stm32f30x_can.o stm32f30x_comp.o stm32f30x_crc.o stm32f30x_dac.o stm32f30x_dbgmcu.o stm32f30x_dma.o stm32f30x_exti.o stm32f30x_flash.o stm32f30x_gpio.o \
-	stm32f30x_i2c.o stm32f30x_iwdg.o stm32f30x_misc.o stm32f30x_opamp.o stm32f30x_pwr.o stm32f30x_rcc.o stm32f30x_rtc.o stm32f30x_spi.o stm32f30x_syscfg.o stm32f30x_tim.o \
-	stm32f30x_usart.o stm32f30x_wwdg.o
-	#stm32f30x_hrtim.o 
-DRVR_OBJ := $(addprefix ../../Libraries/STM32F30x/STM32F30x_StdPeriph_Driver/src/,$(_DRVR_OBJ))
+_DRVR_OBJ := misc.o stm32f10x_adc.o stm32f10x_bkp.o stm32f10x_can.o stm32f10x_cec.o stm32f10x_crc.o stm32f10x_dac.o stm32f10x_dbgmcu.o stm32f10x_dma.o stm32f10x_exti.o stm32f10x_flash.o \
+	stm32f10x_fsmc.o stm32f10x_gpio.o stm32f10x_i2c.o stm32f10x_iwdg.o stm32f10x_pwr.o stm32f10x_rcc.o stm32f10x_rtc.o stm32f10x_sdio.o stm32f10x_spi.o stm32f10x_tim.o \
+	stm32f10x_usart.o stm32f10x_wwdg.o
+DRVR_OBJ := $(addprefix ../../Libraries/STM32F10x/STM32F10x_StdPeriph_Driver/src/,$(_DRVR_OBJ))
 
 
-INCLUDE_PATHS := -I. -I./inc -I../../Libraries -I../../Libraries/STM32F30x/CMSIS/Include -I../../Libraries/STM32F30x/CMSIS/Device/ST/STM32F30x/Include \
-	-I../../Libraries/STM32F30x/STM32F30x_StdPeriph_Driver/inc
-LINKER_SCRIPT := ./STM32F303xE.ld
+INCLUDE_PATHS := -I. -I./inc -I../../Libraries -I../../Libraries/STM32f10x/CMSIS/CM3/CoreSupport -I../../Libraries/STM32f10x/CMSIS/CM3/DeviceSupport/ST/STM32F10x \
+	-I../../Libraries/STM32F10x/STM32F10x_StdPeriph_Driver/inc
+LINKER_SCRIPT := ./STM32F103C8T6.ld
 
 ############################################################################### 
 AS      := "$(GCC_BIN)arm-none-eabi-as"
@@ -34,12 +33,12 @@ SIZE    := "$(GCC_BIN)arm-none-eabi-size"
 # For DEBUG
 
 LD_SYS_LIBS = -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
-COMMON_FLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=soft -g -Wall -fno-common -ffunction-sections -fdata-sections -ffreestanding -fno-builtin -mapcs -DSTM32F303xE
+COMMON_FLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -g -Wall -fno-common -ffunction-sections -fdata-sections -ffreestanding -fno-builtin -mapcs -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER
 
 ASM_FLAGS = $(COMMON_FLAGS) -D__STARTUP_CLEAR_BSS
 
 CC_FLAGS = $(COMMON_FLAGS) -c -MMD -MP $(LD_SYS_LIBS)
-CC_SYMBOLS := -DTOOLCHAIN_GCC_ARM -D__CORTEX_M4 -DTARGET_CORTEX_M -D__FPU_PRESENT=1 -DTARGET_M4 -DTARGET_STM -DTARGET_STM32F3 -DTOOLCHAIN_GCC -DTARGET_STM32F303RE -DARM_MATH_CM4
+CC_SYMBOLS := -DTOOLCHAIN_GCC_ARM -D__CORTEX_M3 -DTARGET_CORTEX_M -D__FPU_PRESENT=1 -DTARGET_M3 -DTARGET_STM -DTARGET_STM32F1 -DTOOLCHAIN_GCC -DTARGET_STM32F103T6 -DARM_MATH_CM3
 
 LD_FLAGS = $(COMMON_FLAGS) -Xlinker --gc-sections -Xlinker -static -Xlinker -z -Xlinker muldefs --specs=nano.specs 
 
@@ -73,6 +72,9 @@ clean:
 .c.o: 
 	$(CC)  $(CC_FLAGS) $(CC_SYMBOLS) -std=gnu99   $(INCLUDE_PATHS) -o $@ $<
 
+./obj/%.o: ./src/%.c
+	$(CC)  $(CC_FLAGS) $(CC_SYMBOLS) -std=gnu99   $(INCLUDE_PATHS) -o $@ $<
+
 .cpp.o:
 	$(CPP) $(CC_FLAGS) $(CC_SYMBOLS) -std=gnu++11 -fno-rtti $(INCLUDE_PATHS) -o $@ $<
 
@@ -96,9 +98,6 @@ lst: $(PROJECT).lst
 
 size: $(PROJECT).elf
 	$(SIZE) $(PROJECT).elf
-
-flash: 
-	"C:\Program Files (x86)\SEGGER\JLink_V600d\JLink.exe" -Device MKL03Z16XXX4 -CommandFile .\flash.jlink
 	
 
 DEPS = $(OBJ:.o=.d) $(SYS_OBJ:.o=.d) $(DRVR_OBJ:.o=.d)  $(UTIL_OBJ:.o=.d)

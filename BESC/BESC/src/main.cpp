@@ -40,7 +40,7 @@ int main(void)
 	//PeripheralInit::InitTIM4();
 
 
-	PeripheralInit::InitUSART1();
+	//PeripheralInit::InitUSART1();
 	//PeripheralInit::InitUSART2();
 
 	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);

@@ -1,88 +1,41 @@
 #include "init.h"
 
-void GPIO_Pin_Init(GPIO_TypeDef* GPIOx, 
-	uint32_t GPIO_Pin, 
+/*void GPIO_Pin_Init(GPIO_TypeDef* GPIOx, 
+	uint16_t GPIO_Pin, 
 	GPIOMode_TypeDef GPIO_Mode,
-	GPIOSpeed_TypeDef GPIO_Speed, 
-	GPIOOType_TypeDef GPIO_OType, 
-	GPIOPuPd_TypeDef GPIO_PuPd)
+	GPIOSpeed_TypeDef GPIO_Speed)
 {
 	GPIO_InitTypeDef GPIO_InitStruct;
 	//GPIO_StructInit(&GPIO_InitStruct);
 
 	GPIO_InitStruct.GPIO_Pin = GPIO_Pin;
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode;
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed;
-	GPIO_InitStruct.GPIO_OType = GPIO_OType;
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode;
 
 	GPIO_Init(GPIOx, &GPIO_InitStruct);
-}
-
-void PeripheralInit::InitClock(void)
-{
-	/* TIMx clock enable */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-
-
-}
+}*/
 
 void PeripheralInit::InitGPIO(void)
 {
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
-	
+	/* GPIOA and GPIOB clock enable */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_AFIO, ENABLE);
 
-	//GPIO_InitTypeDef GPIO_InitStructure;
-	//GPIO_StructInit(&GPIO_InitStructure);
+	GPIO_InitTypeDef GPIO_InitStructure;
 
-	/* Configure GPIOA */
-	GPIO_Pin_Init(GPIOA, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_4 | GPIO_Pin_5, GPIO_Mode_AN, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_NOPULL);
-	//GPIO_Pin_Init(GPIOA, GPIO_Pin_5, GPIO_Mode_AF, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_NOPULL);
-	GPIO_Pin_Init(GPIOA, GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_11 | GPIO_Pin_12, GPIO_Mode_AF, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_DOWN);
-
-	/* Configure GPIOB */
-	GPIO_Pin_Init(GPIOB, GPIO_Pin_0, GPIO_Mode_OUT, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_DOWN);
-
-	GPIO_Pin_Init(GPIOB, GPIO_Pin_1 | GPIO_Pin_2, GPIO_Mode_OUT, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_DOWN);
-
-	GPIO_Pin_Init(GPIOB, GPIO_Pin_8, GPIO_Mode_AF, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_NOPULL);
-	
-	/* Configure GPIOC */
-	GPIO_Pin_Init(GPIOC, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3, GPIO_Mode_AF, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_DOWN);
-	GPIO_Pin_Init(GPIOC, GPIO_Pin_13, GPIO_Mode_AF, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_NOPULL);
-	//GPIO_Pin_Init(GPIOC, GPIO_Pin_13, GPIO_Mode_AF, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_UP);
-
-	/* TIM1_CH1 output port is on PC0(default)
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+	/* GPIOA Configuration:TIM3 Channel1, 2, 3 and 4 as alternate function push-pull */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);*/
 
-	// maps alternate functions.
-	//GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_1); // TIM2_CH1/TIM2_ETR is on af1
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource8, GPIO_AF_8); //COMP1OUT is on af8
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_6); //TIM1CH1 is on af6
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_6); //TIM1CH2 is on af6
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_6); //TIM1CH1N is on af6
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_6); //TIM1CH2N is on af6
-
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource0, GPIO_AF_2); //TIM1CH1 is on af2
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource1, GPIO_AF_2); //TIM1CH2 is on af2
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource2, GPIO_AF_2); //TIM1CH3 is on af2
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource3, GPIO_AF_2); //TIM1CH4 is on af2
-
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource13, GPIO_AF_4);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 
 void PeripheralInit::InitEXTI()
 {
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+	/*RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
 	EXTI_InitTypeDef EXTI_InitStructure;
 	EXTI_StructInit(&EXTI_InitStructure);
@@ -100,17 +53,7 @@ void PeripheralInit::InitEXTI()
 	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
 	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-	EXTI_Init(&EXTI_InitStructure);
-}
-
-void PeripheralInit::InitNVIC()
-{
-	NVIC_InitTypeDef NVIC_InitStructure;
-	NVIC_InitStructure.NVIC_IRQChannel = COMP1_2_3_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+	EXTI_Init(&EXTI_InitStructure);*/
 }
 
 // 
@@ -155,6 +98,7 @@ void PeripheralInit::InitTIM1()
 	TIM_Cmd(TIM1, ENABLE);
 }
 
+#if 0
 void PeripheralInit::InitADC1()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -244,7 +188,9 @@ void PeripheralInit::EnableCOMP1()
 {
 	COMP_Cmd(COMP_Selection_COMP1, ENABLE);
 }
+#endif
 
+#if 0
 void PeripheralInit::InitUSART1(void)
 {
 	/* USART configuration structure for USART1 */
@@ -252,7 +198,7 @@ void PeripheralInit::InitUSART1(void)
 	NVIC_InitTypeDef NVIC_InitStructure;
 
 
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+	//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 	/* Enalbe clock for USART1, AFIO and GPIOA */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 
@@ -332,6 +278,7 @@ void PeripheralInit::InitUSART2()
 
 	//NVIC_EnableIRQ(USART2_IRQn);
 }
+#endif
 
 /*
 void PeripheralInit::SetCOMP1InvInp(const Comp1InvInp cii)

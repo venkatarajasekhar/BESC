@@ -3,19 +3,17 @@
 #define __attribute__(x) 
 //#include "../Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_include.h"
 
-#include "stm32f30x.h"
-#include "system_stm32f30x.h"
+#include "stm32f10x.h"
+#include "system_stm32f10x.h"
+#include "stm32f10x_conf.h"
 
 #include <stdio.h>
 #include <cmath>
-#include <thread>
+//#include <thread>
 
-#include "stm32f30x_conf.h"
-
-enum class MotorState;
 
 #include "init.h"
-#include "interrupt.h"
+#include "stm32f10x_it.h"
 #include "motor.h"
 
 extern uint32_t SystemCoreClock;
@@ -29,15 +27,6 @@ enum class MainMsg
 	CompInterrupt
 };
 
-enum class MotorState
-{
-	Coast,
-	Stop,
-	Brake,
-	Forward,
-	Reverse
-};
-
 struct rotation
 {
 	uint8_t Speed = 0;
@@ -48,6 +37,6 @@ int main(void);
 
 void blink(void);
 
-void COMP1Interrupt(void);
+//void COMP1Interrupt(void);
 
 //static void COMP1_2_3_IRQHandler(void) __attribute__((interrupt("IRQ")));

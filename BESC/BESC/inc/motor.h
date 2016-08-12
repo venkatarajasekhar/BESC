@@ -2,6 +2,15 @@
 
 class CMotor;
 
+enum class MotorState
+{
+	Coast,
+	Stop,
+	Brake,
+	Forward,
+	Reverse
+};
+
 #include "main.h"
 
 class CMotor
