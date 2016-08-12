@@ -4,19 +4,23 @@
 GCC_BIN := C:/Program Files (x86)/GNU Tools ARM Embedded/5.3 2016q1/bin/
 
 PROJECT := BESC
-OBJECTS := $(patsubst %.c,%.o,$(wildcard *.c)) $(patsubst %.cpp,%.o,$(wildcard *.cpp))
-SYS_OBJECTS = ../../Libraries/devices/MKL03Z4/gcc/startup_MKL03Z4.o ../../Libraries/devices/MKL03Z4/system_MKL03Z4.o
-_DRVR_OBJ = fsl_adc16.o fsl_clock.o fsl_cmp.o fsl_common.o fsl_cop.o fsl_flash.o fsl_gpio.o fsl_i2c.o fsl_llwu.o \
-						fsl_lptmr.o fsl_lpuart.o fsl_pmc.o fsl_rcm.o fsl_rtc.o fsl_sim.o fsl_smc.o fsl_spi.o fsl_tpm.o fsl_vref.o 
-						# fsl_i2c_freertos.o fsl_lpuart_freertos.o fsl_spi_freertos.o 
-DRVR_OBJ = $(addprefix ../../Libraries/devices/MKL03Z4/drivers/,$(_DRVR_OBJ))
 
-_UTIL_OBJ := fsl_debug_console.o fsl_notifier.o fsl_sbrk.o fsl_shell.o
-UTIL_OBJ := $(addprefix ../../Libraries/devices/MKL03Z4/utilities/,$(_UTIL_OBJ))
+_OBJ := main.o init.o interrupt.o motor.o
+OBJ := $(addprefix ./obj/,$(_OBJ))
 
-INCLUDE_PATHS = -I. -I../../Libraries -I../../Libraries/CMSIS/Include -I../../Libraries/devices/MKL03Z4/ \
-						-I../../Libraries/devices/MKL03Z4/drivers/ -I../../Libraries/devices/MKL03Z4/utilities/
-LINKER_SCRIPT = ../../Libraries/devices/MKL03Z4/gcc/MKL03Z16xxx4_flash.ld
+_SYS_OBJ := startup_stm32f30x.o system_stm32f30x.o
+SYS_OBJ := $(addprefix ../../Libraries/STM32F30x/CMSIS/Device/ST/STM32F30x/Source/,$(_SYS_OBJ))
+
+_DRVR_OBJ := stm32f30x_adc.o stm32f30x_can.o stm32f30x_comp.o stm32f30x_crc.o stm32f30x_dac.o stm32f30x_dbgmcu.o stm32f30x_dma.o stm32f30x_exti.o stm32f30x_flash.o stm32f30x_gpio.o \
+	stm32f30x_i2c.o stm32f30x_iwdg.o stm32f30x_misc.o stm32f30x_opamp.o stm32f30x_pwr.o stm32f30x_rcc.o stm32f30x_rtc.o stm32f30x_spi.o stm32f30x_syscfg.o stm32f30x_tim.o \
+	stm32f30x_usart.o stm32f30x_wwdg.o
+	#stm32f30x_hrtim.o 
+DRVR_OBJ := $(addprefix ../../Libraries/STM32F30x/STM32F30x_StdPeriph_Driver/src/,$(_DRVR_OBJ))
+
+
+INCLUDE_PATHS := -I. -I./inc -I../../Libraries -I../../Libraries/STM32F30x/CMSIS/Include -I../../Libraries/STM32F30x/CMSIS/Device/ST/STM32F30x/Include \
+	-I../../Libraries/STM32F30x/STM32F30x_StdPeriph_Driver/inc
+LINKER_SCRIPT := ./STM32F303xE.ld
 
 ############################################################################### 
 AS      := "$(GCC_BIN)arm-none-eabi-as"
@@ -29,19 +33,18 @@ SIZE    := "$(GCC_BIN)arm-none-eabi-size"
 
 # For DEBUG
 
-COMMON_FLAGS = -mcpu=cortex-m0plus -mthumb -mfloat-abi=soft -g -Wall -fno-common -ffunction-sections -fdata-sections -ffreestanding -fno-builtin -mapcs 
+LD_SYS_LIBS = -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
+COMMON_FLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=soft -g -Wall -fno-common -ffunction-sections -fdata-sections -ffreestanding -fno-builtin -mapcs -DSTM32F303xE
 
 ASM_FLAGS = $(COMMON_FLAGS) -D__STARTUP_CLEAR_BSS
 
-#CC_FLAGS = $(COMMON_FLAGS) -c -g -fno-common -fmessage-length=0 -Wall -Wextra -fno-exceptions -ffunction-sections -fdata-sections -fomit-frame-pointer -MMD -MP
 CC_FLAGS = $(COMMON_FLAGS) -c -MMD -MP $(LD_SYS_LIBS)
-CC_SYMBOLS = -DTOOLCHAIN_GCC_ARM -DCPU_MKL03Z32VFK4 -DFRDM_KL03Z -DFREEDOM
+CC_SYMBOLS := -DTOOLCHAIN_GCC_ARM -D__CORTEX_M4 -DTARGET_CORTEX_M -D__FPU_PRESENT=1 -DTARGET_M4 -DTARGET_STM -DTARGET_STM32F3 -DTOOLCHAIN_GCC -DTARGET_STM32F303RE -DARM_MATH_CM4
 
 LD_FLAGS = $(COMMON_FLAGS) -Xlinker --gc-sections -Xlinker -static -Xlinker -z -Xlinker muldefs --specs=nano.specs 
-LD_SYS_LIBS = -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 
 
-DEBUG:=1
+DEBUG := 1
 ifeq ($(DEBUG), 1)
   ASM_FLAGS += -DDEBUG
   CC_FLAGS += -DDEBUG -O0
@@ -55,7 +58,8 @@ endif
 all: $(PROJECT).bin $(PROJECT).hex size
 
 clean: 
-	rm -f $(PROJECT).bin $(PROJECT).elf $(PROJECT).hex $(PROJECT).map $(PROJECT).lst $(OBJECTS) $(DEPS) $(DRVR_OBJ) $(UTIL_OBJ)
+	rm -f $(PROJECT).bin $(PROJECT).elf $(PROJECT).hex $(PROJECT).map $(PROJECT).lst $(OBJ) $(DEPS)
+# $(DRVR_OBJ)
 # rm -f $(PROJECT).bin $(PROJECT).elf $(PROJECT).hex $(PROJECT).map $(PROJECT).lst $(OBJECTS) $(DRVR_OBJ) $(DEPS)
 
 
@@ -66,15 +70,16 @@ clean:
 .S.o:
 	$(CC) $(ASM_FLAGS) -c -x assembler-with-cpp -o $@ $<
 
-.c.o:
+.c.o: 
 	$(CC)  $(CC_FLAGS) $(CC_SYMBOLS) -std=gnu99   $(INCLUDE_PATHS) -o $@ $<
 
 .cpp.o:
 	$(CPP) $(CC_FLAGS) $(CC_SYMBOLS) -std=gnu++11 -fno-rtti $(INCLUDE_PATHS) -o $@ $<
 
+./obj/%.o: ./src/%.cpp
+	$(CPP) $(CC_FLAGS) $(CC_SYMBOLS) -std=gnu++11 -fno-rtti $(INCLUDE_PATHS) -o $@ $<
 
-
-$(PROJECT).elf: $(OBJECTS) $(SYS_OBJECTS) $(DRVR_OBJ) $(UTIL_OBJ)
+$(PROJECT).elf: $(OBJ) $(SYS_OBJ) $(DRVR_OBJ) $(UTIL_OBJ)
 	$(LD) $(LD_FLAGS) -T$(LINKER_SCRIPT) $(LIBRARY_PATHS) -o $@ $^ $(LIBRARIES) $(LD_SYS_LIBS) $(LIBRARIES) $(LD_SYS_LIBS)
 
 
@@ -96,7 +101,7 @@ flash:
 	"C:\Program Files (x86)\SEGGER\JLink_V600d\JLink.exe" -Device MKL03Z16XXX4 -CommandFile .\flash.jlink
 	
 
-DEPS = $(OBJECTS:.o=.d) $(SYS_OBJECTS:.o=.d) $(DRVR_OBJ:.o=.d)  $(UTIL_OBJ:.o=.d)
+DEPS = $(OBJ:.o=.d) $(SYS_OBJ:.o=.d) $(DRVR_OBJ:.o=.d)  $(UTIL_OBJ:.o=.d)
 -include $(DEPS)
 
 
