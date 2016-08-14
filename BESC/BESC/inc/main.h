@@ -3,18 +3,7 @@
 #define __attribute__(x) 
 //#include "../Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_include.h"
 
-#include "stm32f10x.h"
-#include "system_stm32f10x.h"
-#include "stm32f10x_conf.h"
-
-#include <stdio.h>
-#include <cmath>
-//#include <thread>
-
-
-#include "init.h"
-#include "stm32f10x_it.h"
-#include "motor.h"
+#include "includes.h"
 
 extern uint32_t SystemCoreClock;
 
