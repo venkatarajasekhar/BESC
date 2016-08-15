@@ -8,19 +8,19 @@ PROJECT := BESC
 _OBJ := main.o init.o interrupt.o motor.o
 OBJ := $(addprefix ./obj/,$(_OBJ))
 
-_SYS_OBJ := startup_stm32f30x.o system_stm32f30x.o
-SYS_OBJ := $(addprefix ../../Libraries/STM32F30x/CMSIS/Device/ST/STM32F30x/Source/,$(_SYS_OBJ))
-
-_DRVR_OBJ := stm32f30x_adc.o stm32f30x_can.o stm32f30x_comp.o stm32f30x_crc.o stm32f30x_dac.o stm32f30x_dbgmcu.o stm32f30x_dma.o stm32f30x_exti.o stm32f30x_flash.o stm32f30x_gpio.o \
-	stm32f30x_i2c.o stm32f30x_iwdg.o stm32f30x_misc.o stm32f30x_opamp.o stm32f30x_pwr.o stm32f30x_rcc.o stm32f30x_rtc.o stm32f30x_spi.o stm32f30x_syscfg.o stm32f30x_tim.o \
-	stm32f30x_usart.o stm32f30x_wwdg.o
-	#stm32f30x_hrtim.o 
-DRVR_OBJ := $(addprefix ../../Libraries/STM32F30x/STM32F30x_StdPeriph_Driver/src/,$(_DRVR_OBJ))
+_SYS_OBJ := startup_stm32f030.o system_stm32f0xx.o
+SYS_OBJ := $(addprefix ../../Libraries/STM32F0xx/CMSIS/Device/ST/STM32F0xx/Source/,$(_SYS_OBJ))
 
 
-INCLUDE_PATHS := -I. -I./inc -I../../Libraries -I../../Libraries/STM32F30x/CMSIS/Include -I../../Libraries/STM32F30x/CMSIS/Device/ST/STM32F30x/Include \
-	-I../../Libraries/STM32F30x/STM32F30x_StdPeriph_Driver/inc
-LINKER_SCRIPT := ./STM32F303xE.ld
+_DRVR_OBJ := stm32f0xx_adc.o stm32f0xx_can.o stm32f0xx_cec.o stm32f0xx_crc.o stm32f0xx_crs.o stm32f0xx_comp.o stm32f0xx_dac.o stm32f0xx_dbgmcu.o stm32f0xx_dma.o stm32f0xx_exti.o \
+	stm32f0xx_flash.o stm32f0xx_gpio.o stm32f0xx_syscfg.o stm32f0xx_i2c.o stm32f0xx_iwdg.o stm32f0xx_pwr.o stm32f0xx_rcc.o stm32f0xx_rtc.o stm32f0xx_spi.o stm32f0xx_tim.o \
+	stm32f0xx_usart.o stm32f0xx_wwdg.o stm32f0xx_misc.o 
+
+DRVR_OBJ := $(addprefix ../../Libraries/STM32F0xx/STM32F0xx_StdPeriph_Driver/src/,$(_DRVR_OBJ))
+
+
+INCLUDE_PATHS := -I. -I./inc -I../../Libraries/STM32F0xx/CMSIS/Include -I../../Libraries/STM32F0xx/CMSIS/Device/ST/STM32F0xx/Include -I../../Libraries/STM32F0xx/STM32F0xx_StdPeriph_Driver/inc
+LINKER_SCRIPT := ./STM32F030K6.ld
 
 ############################################################################### 
 AS      := "$(GCC_BIN)arm-none-eabi-as"
@@ -34,12 +34,12 @@ SIZE    := "$(GCC_BIN)arm-none-eabi-size"
 # For DEBUG
 
 LD_SYS_LIBS = -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
-COMMON_FLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=soft -g -Wall -fno-common -ffunction-sections -fdata-sections -ffreestanding -fno-builtin -mapcs -DSTM32F303xE
+COMMON_FLAGS = -mcpu=cortex-m0plus -mthumb -mfloat-abi=soft -g -Wall -fno-common -ffunction-sections -fdata-sections -ffreestanding -fno-builtin -mapcs -DSTM32F030
 
 ASM_FLAGS = $(COMMON_FLAGS) -D__STARTUP_CLEAR_BSS
 
 CC_FLAGS = $(COMMON_FLAGS) -c -MMD -MP $(LD_SYS_LIBS)
-CC_SYMBOLS := -DTOOLCHAIN_GCC_ARM -D__CORTEX_M4 -DTARGET_CORTEX_M -D__FPU_PRESENT=1 -DTARGET_M4 -DTARGET_STM -DTARGET_STM32F3 -DTOOLCHAIN_GCC -DTARGET_STM32F303RE -DARM_MATH_CM4
+CC_SYMBOLS := -DTOOLCHAIN_GCC_ARM -D__CORTEX_M0PLUS -DTARGET_CORTEX_M -D__FPU_PRESENT=1 -DTARGET_M0PLUS -DTARGET_STM -DTARGET_STM32F0 -DTOOLCHAIN_GCC -DTARGET_STM32F030K6 -DARM_MATH_CM0
 
 LD_FLAGS = $(COMMON_FLAGS) -Xlinker --gc-sections -Xlinker -static -Xlinker -z -Xlinker muldefs --specs=nano.specs 
 

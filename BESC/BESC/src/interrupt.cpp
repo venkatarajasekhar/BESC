@@ -86,15 +86,6 @@ extern "C"
 		}
 	}
 
-	/* Handle TIM4 interrupt */
-	void TIM4_IRQHandler(void)
-	{
-		if (TIM_GetFlagStatus(TIM4, TIM_FLAG_Update) == SET)
-		{
-			TIM_ClearFlag(TIM4, TIM_FLAG_Update);
-		}
-	}
-
 	void USART1_IRQHandler(void)
 	{
 		//printf("usart1IRQ\n");

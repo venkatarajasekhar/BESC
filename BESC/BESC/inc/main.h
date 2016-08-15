@@ -3,14 +3,14 @@
 #define __attribute__(x) 
 //#include "../Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_include.h"
 
-#include "stm32f30x.h"
-#include "system_stm32f30x.h"
+#include "stm32f0xx.h"
+#include "system_stm32f0xx.h"
 
 #include <stdio.h>
 #include <cmath>
-#include <thread>
+//#include <thread>
 
-#include "stm32f30x_conf.h"
+#include "stm32f0xx_conf.h"
 
 enum class MotorState;
 

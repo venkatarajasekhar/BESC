@@ -36,7 +36,7 @@
 #endif 
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f30x.h"
+#include "stm32f0xx.h"
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
@@ -48,10 +48,10 @@ void HardFault_Handler(void);
 void SVC_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
-void EXTI15_10_IRQHandler(void) __attribute__((interrupt("IRQ")));
-void COMP1_2_3_IRQHandler(void) __attribute__((interrupt("IRQ")));
-void TIM4_IRQHandler(void) __attribute__((interrupt("IRQ")));
-//void USART2_IRQHandler(void) __attribute__((interrupt("IRQ")));
+void EXTI15_10_IRQHandler(void);
+void COMP1_2_3_IRQHandler(void);
+void TIM4_IRQHandler(void);
+//void USART2_IRQHandler(void)
 
 #ifdef __cplusplus
 }

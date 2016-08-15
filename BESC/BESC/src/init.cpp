@@ -65,7 +65,7 @@ void PeripheralInit::InitGPIO(void)
 
 	// maps alternate functions.
 	//GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_1); // TIM2_CH1/TIM2_ETR is on af1
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource8, GPIO_AF_8); //COMP1OUT is on af8
+	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource8, GPIO_AF_8); //COMP1OUT is on af8
 
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_6); //TIM1CH1 is on af6
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_6); //TIM1CH2 is on af6
@@ -101,16 +101,6 @@ void PeripheralInit::InitEXTI()
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
 	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
 	EXTI_Init(&EXTI_InitStructure);
-}
-
-void PeripheralInit::InitNVIC()
-{
-	NVIC_InitTypeDef NVIC_InitStructure;
-	NVIC_InitStructure.NVIC_IRQChannel = COMP1_2_3_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
 }
 
 // 
@@ -155,96 +145,6 @@ void PeripheralInit::InitTIM1()
 	TIM_Cmd(TIM1, ENABLE);
 }
 
-void PeripheralInit::InitADC1()
-{
-	GPIO_InitTypeDef GPIO_InitStructure;
-	ADC_InitTypeDef       ADC_InitStructure;
-	ADC_CommonInitTypeDef ADC_CommonInitStructure;
-
-	RCC_ADCCLKConfig(RCC_ADC12PLLCLK_Div12);
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_ADC12, ENABLE);
-
-	/*
-	GPIO_StructInit(&GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
-	*/
-
-
-	ADC_CommonStructInit(&ADC_CommonInitStructure);
-	ADC_StructInit(&ADC_InitStructure);
-
-	/* Calibration procedure */
-	ADC_VoltageRegulatorCmd(ADC1, ENABLE);
-
-	ADC_SelectCalibrationMode(ADC1, ADC_CalibrationMode_Single);
-	ADC_StartCalibration(ADC1);
-
-	while (ADC_GetCalibrationStatus(ADC1) != RESET);
-	//calibration_value = ADC_GetCalibrationValue(ADC1);
-
-	ADC_CommonInitStructure.ADC_Mode = ADC_Mode_Independent;
-	ADC_CommonInitStructure.ADC_Clock = ADC_Clock_AsynClkMode;
-	ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
-	ADC_CommonInitStructure.ADC_DMAMode = ADC_DMAMode_OneShot;
-	ADC_CommonInitStructure.ADC_TwoSamplingDelay = 0;
-
-	ADC_CommonInit(ADC1, &ADC_CommonInitStructure);
-
-	ADC_InitStructure.ADC_ContinuousConvMode = ADC_ContinuousConvMode_Enable;
-	ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
-	ADC_InitStructure.ADC_ExternalTrigConvEvent = ADC_ExternalTrigConvEvent_0;
-	ADC_InitStructure.ADC_ExternalTrigEventEdge = ADC_ExternalTrigEventEdge_None;
-	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-	ADC_InitStructure.ADC_OverrunMode = ADC_OverrunMode_Disable;
-	ADC_InitStructure.ADC_AutoInjMode = ADC_AutoInjec_Disable;
-	ADC_InitStructure.ADC_NbrOfRegChannel = 1;
-
-	ADC_Init(ADC1, &ADC_InitStructure);
-
-	/* ADC2 regular channel14 configuration to sample time = 55.5 cycles */
-	//ADC_RegularChannelConfig(ADC2, ADC_Channel_14, 1, ADC_SampleTime_55Cycles5);
-
-	/* Enable ADC2  */
-	//ADC_Cmd(ADC2, ENABLE);
-
-	/* Enable ADC2 reset calibaration register */
-	//ADC_ResetCalibration(ADC2);
-
-	/* Check the end of ADC1 reset calibration register */
-	//while (ADC_GetResetCalibrationStatus(ADC2));
-
-	/* Start ADC2 calibaration */
-	//ADC_StartCalibration(ADC2);
-	/* Check the end of ADC2 calibration */
-	//while (ADC_GetCalibrationStatus(ADC2));
-
-	NVIC_EnableIRQ(IRQn::ADC1_2_IRQn);
-}
-
-void PeripheralInit::InitCOMP1(const Comp1InvInp cii, const CompOutPol pol, const CompMode mode)
-{
-	// Note: comparators require no clock input
-	COMP_InitTypeDef COMP_InitStruct;
-	//COMP_StructInit(&COMP_InitStruct);
-
-	COMP_InitStruct.COMP_InvertingInput		= static_cast<uint32_t>(cii);
-	COMP_InitStruct.COMP_OutputPol			= static_cast<uint32_t>(pol);
-	COMP_InitStruct.COMP_Mode				= static_cast<uint32_t>(mode);
-	COMP_InitStruct.COMP_NonInvertingInput	= COMP_NonInvertingInput_IO1;
-	COMP_InitStruct.COMP_Output				= COMP_Output_None;
-	COMP_InitStruct.COMP_BlankingSrce		= COMP_BlankingSrce_None;
-	COMP_InitStruct.COMP_Hysteresis			= COMP_Hysteresis_No;
-
-	COMP_Init(COMP_Selection_COMP1, &COMP_InitStruct);
-}
-
-void PeripheralInit::EnableCOMP1()
-{
-	COMP_Cmd(COMP_Selection_COMP1, ENABLE);
-}
-
 void PeripheralInit::InitUSART1(void)
 {
 	/* USART configuration structure for USART1 */
@@ -282,16 +182,6 @@ void PeripheralInit::InitUSART1(void)
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	USART_Init(USART1, &USART_InitStructure);
-
-	/* NVIC configuration */
-	/* Configure the Priority Group to 2 bits */
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-
-	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
 
 	/* Enable USART1 */
 	USART_Cmd(USART1, ENABLE);

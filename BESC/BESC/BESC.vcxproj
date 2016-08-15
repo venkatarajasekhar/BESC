@@ -44,7 +44,7 @@
     <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>make clean all</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>STM32F303xE;_DEBUG;__GNUC__;$(NMakePreprocessorDefinitions);CPU_MKL03Z16VFK4</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>./;./inc/;../../Libraries/STM32F30x/CMSIS/Include;../../Libraries/STM32F30x/CMSIS/Device/ST/STM32F30x/Include;../../Libraries/STM32F30x/STM32F30x_StdPeriph_Driver/inc;C:\Program Files (x86)\GNU Tools ARM Embedded\5.3 2016q1\arm-none-eabi\include</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>./;./inc/;../../Libraries/STM32F0xx/CMSIS/Include;../../Libraries/STM32F0xx/CMSIS/Device/ST/STM32F0xx/Include;../../Libraries/STM32F0xx/STM32F0xx_StdPeriph_Driver/inc;C:\Program Files (x86)\GNU Tools ARM Embedded\5.3 2016q1\arm-none-eabi\include</NMakeIncludeSearchPath>
     <SourcePath>$(VC_SourcePath);..\..\Libraries\devices\MKL03Z4\drivers\</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />
+    <None Include="STM32F030K6.ld" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\init.cpp" />
@@ -75,7 +76,7 @@
     <ClInclude Include="inc\interrupt.h" />
     <ClInclude Include="inc\main.h" />
     <ClInclude Include="inc\motor.h" />
-    <ClInclude Include="inc\stm32f30x_conf.h" />
+    <ClInclude Include="inc\stm32f0xx_conf.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
