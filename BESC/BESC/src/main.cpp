@@ -54,9 +54,9 @@ int main(void)
 	while (1)
 	{
 #define MASK (0x1<<13 | 0x1<<14)
-		GPIO_SetBits(GPIOC, GPIO_Pin_13 | GPIO_Pin_14);
+		//GPIO_SetBits(GPIOC, GPIO_Pin_13 | GPIO_Pin_14);
 		/* Set PD0 and PD2 */
-		//GPIOC->BSRR = MASK;
+		GPIOC->BSRR = MASK;
 		/* Reset PD0 and PD2 */
 		//GPIOC->BRR = MASK;
 	}
