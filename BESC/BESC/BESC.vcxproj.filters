@@ -19,6 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />
+    <None Include="STM32F103C8T6.ld" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stm32f10x_it.c">
