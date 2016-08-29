@@ -39,21 +39,21 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeBuildCommandLine>make all</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>make DEBUG=1 all</NMakeBuildCommandLine>
     <NMakeOutput>BESC.bin</NMakeOutput>
-    <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>make clean all</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>make DEBUG=1 clean</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>make DEBUG=1 clean all</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>_DEBUG;__GNUC__;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>./;./inc/;../../Libraries/STM32f10x/CMSIS/CM3/CoreSupport;../../Libraries/STM32f10x/CMSIS/CM3/DeviceSupport/ST/STM32F10x;../../Libraries/STM32F10x/STM32F10x_StdPeriph_Driver/inc;C:\Program Files (x86)\GNU Tools ARM Embedded\5.3 2016q1\arm-none-eabi\include</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>./;./inc/;Drivers\CMSIS\Include;Drivers\CMSIS\Device\ST\STM32F1xx\Include;Drivers\STM32F1xx_HAL_Driver\Inc;C:\Program Files (x86)\GNU Tools ARM Embedded\5.3 2016q1\arm-none-eabi\include</NMakeIncludeSearchPath>
     <SourcePath>$(VC_SourcePath);</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeBuildCommandLine>make all</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>make NDEBUG=1 all</NMakeBuildCommandLine>
     <NMakeOutput>BESC.bin</NMakeOutput>
-    <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>make clean all</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>make NDEBUG=1 clean</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>make NDEBUG=1 clean all</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>NDEBUG;__GNUC__;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>./;..\..\Libraries\CMSIS\Include\;..\..\Libraries\devices\;..\..\Libraries\devices\MKL03Z4\;..\..\Libraries\devices\MKL03Z4\drivers\;..\..\Libraries\devices\MKL03Z4\utilities;C:\Program Files (x86)\GNU Tools ARM Embedded\5.3 2016q1\arm-none-eabi\include</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>./;./inc/;Drivers\CMSIS\Include;Drivers\CMSIS\Device\ST\STM32F1xx\Include;Drivers\STM32F1xx_HAL_Driver\Inc;C:\Program Files (x86)\GNU Tools ARM Embedded\5.3 2016q1\arm-none-eabi\include</NMakeIncludeSearchPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
@@ -68,15 +68,18 @@
     <ClCompile Include="src\init.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\motor.cpp" />
-    <ClCompile Include="src\stm32f10x_it.c" />
+    <ClCompile Include="src\stm32f1xx_hal_msp.c" />
+    <ClCompile Include="src\stm32f1xx_it.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\includes.h" />
     <ClInclude Include="inc\init.h" />
     <ClInclude Include="inc\main.h" />
     <ClInclude Include="inc\motor.h" />
-    <ClInclude Include="inc\stm32f10x_conf.h" />
-    <ClInclude Include="inc\stm32f10x_it.h" />
+    <ClInclude Include="inc\mxconstants.h" />
+    <ClInclude Include="inc\stm32f1xx_hal_conf.h" />
+    <ClInclude Include="inc\stm32f1xx_hal_msp.h" />
+    <ClInclude Include="inc\stm32f1xx_it.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

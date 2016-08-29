@@ -2,9 +2,10 @@
 
 
 
-#include "stm32f10x.h"
-#include "system_stm32f10x.h"
-#include "stm32f10x_conf.h"
+#include "stm32f1xx.h"
+#include "system_stm32f1xx.h"
+#include "stm32f1xx_hal_conf.h"
+#include "stm32f1xx_hal.h"
 
 #include <stdio.h>
 #include <cmath>
@@ -12,6 +13,6 @@
 
 
 #include "init.h"
-#include "stm32f10x_it.h"
+#include "stm32f1xx_it.h"
 #include "motor.h"
 

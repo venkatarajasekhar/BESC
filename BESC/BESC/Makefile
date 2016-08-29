@@ -5,20 +5,19 @@ GCC_BIN := C:/Program Files (x86)/GNU Tools ARM Embedded/5.3 2016q1/bin/
 
 PROJECT := BESC
 
-_OBJ := main.o init.o stm32f10x_it.o motor.o
+_OBJ := main.o init.o stm32f1xx_it.o stm32f1xx_hal_msp.o
 OBJ := $(addprefix ./obj/,$(_OBJ))
 
-_SYS_OBJ := startup/gcc_ride7/startup_stm32f10x_md.o system_stm32f10x.o
-SYS_OBJ := $(addprefix ../../Libraries/STM32F10x/CMSIS/CM3/DeviceSupport/ST/STM32F10x/,$(_SYS_OBJ))
+_SYS_OBJ := system_stm32f1xx.o gcc/startup_stm32f103xb.o
+SYS_OBJ := $(addprefix ./Drivers/CMSIS/Device/ST/STM32F1xx/Source/Templates/,$(_SYS_OBJ))
 
-_DRVR_OBJ := misc.o stm32f10x_adc.o stm32f10x_bkp.o stm32f10x_can.o stm32f10x_cec.o stm32f10x_crc.o stm32f10x_dac.o stm32f10x_dbgmcu.o stm32f10x_dma.o stm32f10x_exti.o stm32f10x_flash.o \
-	stm32f10x_fsmc.o stm32f10x_gpio.o stm32f10x_i2c.o stm32f10x_iwdg.o stm32f10x_pwr.o stm32f10x_rcc.o stm32f10x_rtc.o stm32f10x_sdio.o stm32f10x_spi.o stm32f10x_tim.o \
-	stm32f10x_usart.o stm32f10x_wwdg.o
-DRVR_OBJ := $(addprefix ../../Libraries/STM32F10x/STM32F10x_StdPeriph_Driver/src/,$(_DRVR_OBJ))
+_DRVR_OBJ := stm32f1xx_hal.o stm32f1xx_hal_can.o stm32f1xx_hal_cortex.o stm32f1xx_hal_crc.o stm32f1xx_hal_dma.o stm32f1xx_hal_flash.o stm32f1xx_hal_flash_ex.o stm32f1xx_hal_gpio.o \
+	stm32f1xx_hal_gpio_ex.o stm32f1xx_hal_i2c.o stm32f1xx_hal_pwr.o stm32f1xx_hal_rcc.o stm32f1xx_hal_rcc_ex.o stm32f1xx_hal_spi.o stm32f1xx_hal_spi_ex.o stm32f1xx_hal_tim.o \
+	stm32f1xx_hal_tim_ex.o stm32f1xx_hal_uart.o stm32f1xx_hal_wwdg.o
+DRVR_OBJ := $(addprefix ./Drivers/STM32F1xx_HAL_Driver/Src/,$(_DRVR_OBJ))
 
 
-INCLUDE_PATHS := -I. -I./inc -I../../Libraries -I../../Libraries/STM32f10x/CMSIS/CM3/CoreSupport -I../../Libraries/STM32f10x/CMSIS/CM3/DeviceSupport/ST/STM32F10x \
-	-I../../Libraries/STM32F10x/STM32F10x_StdPeriph_Driver/inc
+INCLUDE_PATHS := -I. -I./inc -I./Drivers -I./Drivers/CMSIS/Device/ST/STM32F1xx/Include -I./Drivers/CMSIS/Include -I./Drivers/STM32F1xx_HAL_Driver/Inc
 LINKER_SCRIPT := ./STM32F103C8T6.ld
 
 ############################################################################### 
@@ -43,7 +42,7 @@ CC_SYMBOLS := -DTOOLCHAIN_GCC_ARM -D__CORTEX_M3 -DTARGET_CORTEX_M -D__FPU_PRESEN
 LD_FLAGS = $(COMMON_FLAGS) -Xlinker --gc-sections -Xlinker -static -Xlinker -z -Xlinker muldefs --specs=nano.specs 
 
 
-DEBUG := 1
+#DEBUG := 1
 ifeq ($(DEBUG), 1)
   ASM_FLAGS += -DDEBUG
   CC_FLAGS += -DDEBUG -O0
@@ -57,9 +56,9 @@ endif
 all: $(PROJECT).bin $(PROJECT).hex size
 
 clean: 
-	rm -f $(PROJECT).bin $(PROJECT).elf $(PROJECT).hex $(PROJECT).map $(PROJECT).lst $(OBJ) $(DEPS)
+	rm -f $(PROJECT).bin $(PROJECT).elf $(PROJECT).hex $(PROJECT).map $(PROJECT).lst $(OBJ) $(DEPS) $(SYS_OBJ) $(DRVR_OBJ)
 # $(DRVR_OBJ)
-# rm -f $(PROJECT).bin $(PROJECT).elf $(PROJECT).hex $(PROJECT).map $(PROJECT).lst $(OBJECTS) $(DRVR_OBJ) $(DEPS)
+# rm -f $(PROJECT).bin $(PROJECT).elf $(PROJECT).hex $(PROJECT).map $(PROJECT).lst $(OBJECTS) $(DEPS)
 
 
 .asm.o:

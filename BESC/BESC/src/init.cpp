@@ -1,295 +1,331 @@
 #include "init.h"
 
-/*void GPIO_Pin_Init(GPIO_TypeDef* GPIOx, 
-	uint16_t GPIO_Pin, 
-	GPIOMode_TypeDef GPIO_Mode,
-	GPIOSpeed_TypeDef GPIO_Speed)
-{
-	GPIO_InitTypeDef GPIO_InitStruct;
-	//GPIO_StructInit(&GPIO_InitStruct);
+CAN_HandleTypeDef hcan;
 
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed;
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode;
+CRC_HandleTypeDef hcrc;
 
-	GPIO_Init(GPIOx, &GPIO_InitStruct);
-}*/
+I2C_HandleTypeDef hi2c2;
 
-void PeripheralInit::InitGPIO(void)
-{
-	/* GPIOA and GPIOB clock enable */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_AFIO, ENABLE);
+SPI_HandleTypeDef hspi1;
 
-	GPIO_InitTypeDef GPIO_InitStructure;
+TIM_HandleTypeDef htim1;
 
-	/* GPIOA Configuration:TIM3 Channel1, 2, 3 and 4 as alternate function push-pull */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart2;
 
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+WWDG_HandleTypeDef hwwdg;
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-}
-
-void PeripheralInit::InitEXTI()
-{
-	/*RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-
-	EXTI_InitTypeDef EXTI_InitStructure;
-	EXTI_StructInit(&EXTI_InitStructure);
-
-	EXTI_InitStructure.EXTI_Line = EXTI_Line21;
-	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-	EXTI_Init(&EXTI_InitStructure);
-
-
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource13);
-
-	EXTI_InitStructure.EXTI_Line = EXTI_Line13;
-	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-	EXTI_Init(&EXTI_InitStructure);*/
-}
-
-// 
-// TIM1 used for main MOSFET switching
-// 
-void PeripheralInit::InitTIM1()
-{
-	/* TIMx clock enable */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
-
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-	TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
-	TIM_OCInitTypeDef TIM_OCInitStructure;
-	TIM_OCStructInit(&TIM_OCInitStructure);
-
-	int pwmfreq = 25000;
-
-	// Time base configuration     72MHz / 3 / 2 / 500 = 24kHz
-	TIM_TimeBaseStructure.TIM_Period = PwmStepCount - 1; // count 0-499 => 500
-	TIM_TimeBaseStructure.TIM_Prescaler = 2; // presc: 1/3
-	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_CenterAligned3;
-	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
-
-	// PWM1 Mode configuration: TIM1_CH1
-	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 0;
-	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
-	TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_High;
-	TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
-	TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCNIdleState_Set;
-
-	TIM_OC1Init(TIM1, &TIM_OCInitStructure);
-	TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
-	TIM_OC2Init(TIM1, &TIM_OCInitStructure);
-	TIM_OC2PreloadConfig(TIM1, TIM_OCPreload_Enable);
-
-	TIM_ARRPreloadConfig(TIM1, ENABLE);
-	TIM_CtrlPWMOutputs(TIM1, ENABLE);
-	TIM_Cmd(TIM1, ENABLE);
-}
-
-#if 0
-void PeripheralInit::InitADC1()
-{
-	GPIO_InitTypeDef GPIO_InitStructure;
-	ADC_InitTypeDef       ADC_InitStructure;
-	ADC_CommonInitTypeDef ADC_CommonInitStructure;
-
-	RCC_ADCCLKConfig(RCC_ADC12PLLCLK_Div12);
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_ADC12, ENABLE);
-
-	/*
-	GPIO_StructInit(&GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
-	*/
-
-
-	ADC_CommonStructInit(&ADC_CommonInitStructure);
-	ADC_StructInit(&ADC_InitStructure);
-
-	/* Calibration procedure */
-	ADC_VoltageRegulatorCmd(ADC1, ENABLE);
-
-	ADC_SelectCalibrationMode(ADC1, ADC_CalibrationMode_Single);
-	ADC_StartCalibration(ADC1);
-
-	while (ADC_GetCalibrationStatus(ADC1) != RESET);
-	//calibration_value = ADC_GetCalibrationValue(ADC1);
-
-	ADC_CommonInitStructure.ADC_Mode = ADC_Mode_Independent;
-	ADC_CommonInitStructure.ADC_Clock = ADC_Clock_AsynClkMode;
-	ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
-	ADC_CommonInitStructure.ADC_DMAMode = ADC_DMAMode_OneShot;
-	ADC_CommonInitStructure.ADC_TwoSamplingDelay = 0;
-
-	ADC_CommonInit(ADC1, &ADC_CommonInitStructure);
-
-	ADC_InitStructure.ADC_ContinuousConvMode = ADC_ContinuousConvMode_Enable;
-	ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
-	ADC_InitStructure.ADC_ExternalTrigConvEvent = ADC_ExternalTrigConvEvent_0;
-	ADC_InitStructure.ADC_ExternalTrigEventEdge = ADC_ExternalTrigEventEdge_None;
-	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-	ADC_InitStructure.ADC_OverrunMode = ADC_OverrunMode_Disable;
-	ADC_InitStructure.ADC_AutoInjMode = ADC_AutoInjec_Disable;
-	ADC_InitStructure.ADC_NbrOfRegChannel = 1;
-
-	ADC_Init(ADC1, &ADC_InitStructure);
-
-	/* ADC2 regular channel14 configuration to sample time = 55.5 cycles */
-	//ADC_RegularChannelConfig(ADC2, ADC_Channel_14, 1, ADC_SampleTime_55Cycles5);
-
-	/* Enable ADC2  */
-	//ADC_Cmd(ADC2, ENABLE);
-
-	/* Enable ADC2 reset calibaration register */
-	//ADC_ResetCalibration(ADC2);
-
-	/* Check the end of ADC1 reset calibration register */
-	//while (ADC_GetResetCalibrationStatus(ADC2));
-
-	/* Start ADC2 calibaration */
-	//ADC_StartCalibration(ADC2);
-	/* Check the end of ADC2 calibration */
-	//while (ADC_GetCalibrationStatus(ADC2));
-
-	NVIC_EnableIRQ(IRQn::ADC1_2_IRQn);
-}
-
-void PeripheralInit::InitCOMP1(const Comp1InvInp cii, const CompOutPol pol, const CompMode mode)
-{
-	// Note: comparators require no clock input
-	COMP_InitTypeDef COMP_InitStruct;
-	//COMP_StructInit(&COMP_InitStruct);
-
-	COMP_InitStruct.COMP_InvertingInput		= static_cast<uint32_t>(cii);
-	COMP_InitStruct.COMP_OutputPol			= static_cast<uint32_t>(pol);
-	COMP_InitStruct.COMP_Mode				= static_cast<uint32_t>(mode);
-	COMP_InitStruct.COMP_NonInvertingInput	= COMP_NonInvertingInput_IO1;
-	COMP_InitStruct.COMP_Output				= COMP_Output_None;
-	COMP_InitStruct.COMP_BlankingSrce		= COMP_BlankingSrce_None;
-	COMP_InitStruct.COMP_Hysteresis			= COMP_Hysteresis_No;
-
-	COMP_Init(COMP_Selection_COMP1, &COMP_InitStruct);
-}
-
-void PeripheralInit::EnableCOMP1()
-{
-	COMP_Cmd(COMP_Selection_COMP1, ENABLE);
-}
-#endif
-
-#if 0
-void PeripheralInit::InitUSART1(void)
-{
-	/* USART configuration structure for USART1 */
-	USART_InitTypeDef USART_InitStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
-
-
-	//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-	/* Enalbe clock for USART1, AFIO and GPIOA */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-
-	/* GPIOA PIN9 alternative function Tx */
-	/* GPIOA PIN10 alternative function Rx */
-	/*GPIO_Pin_Init(GPIOA, GPIO_Pin_2 | GPIO_Pin_3, GPIO_Mode_AF, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_UP);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_1);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_1);*/
-	GPIO_Pin_Init(GPIOA, /*GPIO_Pin_9 | */GPIO_Pin_10, GPIO_Mode_AF, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_UP);
-	//GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_7);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_7);
-
-
-	/* USARTx configuration ----------------------------------------------------*/
-	/* USARTx configured as follow:
-	- BaudRate = 230400 baud
-	- Word Length = 8 Bits
-	- One Stop Bit
-	- No parity
-	- Hardware flow control disabled (RTS and CTS signals)
-	- Receive and transmit enabled
-	*/
-	USART_InitStructure.USART_BaudRate = 9600;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	USART_Init(USART1, &USART_InitStructure);
-
-	/* NVIC configuration */
-	/* Configure the Priority Group to 2 bits */
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-
-	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-
-	/* Enable USART1 */
-	USART_Cmd(USART1, ENABLE);
-}
-
-void PeripheralInit::InitUSART2()
-{
-	USART_InitTypeDef USART_InitStruct;
-	USART_StructInit(&USART_InitStruct);
-
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-
-	GPIO_Pin_Init(GPIOA, GPIO_Pin_2 | GPIO_Pin_3, GPIO_Mode_AF, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_NOPULL);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_7);	// USART2_TX
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_7);	// USART2_RX
-
-	USART_DeInit(USART2);
-	USART_InitStruct.USART_BaudRate = 9600;
-	USART_InitStruct.USART_WordLength = USART_WordLength_8b;
-	USART_InitStruct.USART_StopBits = USART_StopBits_1;
-	USART_InitStruct.USART_Parity = USART_Parity_No;
-	USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStruct.USART_Mode = USART_Mode_Rx;
-	USART_Init(USART2, &USART_InitStruct);
-
-	USART_Cmd(USART2, ENABLE);
-
-	/*
-	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
-	USART_ClearITPendingBit(USART2, USART_IT_TXE);
-	*/
-	/* Enable USART2 Receive and Transmit interrupts 
-	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
-	USART_ITConfig(USART2, USART_IT_TXE, ENABLE);*/
-
-	//blink();
-
-	//NVIC_EnableIRQ(USART2_IRQn);
-}
-#endif
-
-/*
-void PeripheralInit::SetCOMP1InvInp(const Comp1InvInp cii)
-{
-	/*!< Write to COMPx_CSR register *
-	*(__IO uint32_t *) (COMP_BASE + COMP1) |= static_cast<uint32_t>(cii);
-}
-
-void PeripheralInit::SetCOMP1OutPol(const CompOutPol pol)
-{
-	/*!< Write to COMPx_CSR register *
-	*(__IO uint32_t *) (COMP_BASE + COMP1) |= static_cast<uint32_t>(pol);
-}
+/** System Clock Configuration
 */
+void SystemClock_Config(void)
+{
+
+	RCC_OscInitTypeDef RCC_OscInitStruct;
+	RCC_ClkInitTypeDef RCC_ClkInitStruct;
+
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+	RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+	RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+		| RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
+
+	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
+	/* SysTick_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+}
+
+/* CAN init function */
+void Init::MX_CAN_Init(void)
+{
+
+	hcan.Instance = CAN1;
+	hcan.Init.Prescaler = 16;
+	hcan.Init.Mode = CAN_MODE_NORMAL;
+	hcan.Init.SJW = CAN_SJW_1TQ;
+	hcan.Init.BS1 = CAN_BS1_1TQ;
+	hcan.Init.BS2 = CAN_BS2_1TQ;
+	hcan.Init.TTCM = DISABLE;
+	hcan.Init.ABOM = DISABLE;
+	hcan.Init.AWUM = DISABLE;
+	hcan.Init.NART = DISABLE;
+	hcan.Init.RFLM = DISABLE;
+	hcan.Init.TXFP = DISABLE;
+	if (HAL_CAN_Init(&hcan) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+}
+
+/* CRC init function */
+void Init::MX_CRC_Init(void)
+{
+
+	hcrc.Instance = CRC;
+	if (HAL_CRC_Init(&hcrc) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+}
+
+/* I2C2 init function */
+void Init::MX_I2C2_Init(void)
+{
+
+	hi2c2.Instance = I2C2;
+	hi2c2.Init.ClockSpeed = 400000;
+	hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+	hi2c2.Init.OwnAddress1 = 0;
+	hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+	hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+	hi2c2.Init.OwnAddress2 = 0;
+	hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+	hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+	if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+}
+
+/* SPI1 init function */
+void Init::MX_SPI1_Init(void)
+{
+
+	hspi1.Instance = SPI1;
+	hspi1.Init.Mode = SPI_MODE_MASTER;
+	hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+	hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+	hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+	hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+	hspi1.Init.NSS = SPI_NSS_SOFT;
+	hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+	hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+	hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+	hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+	hspi1.Init.CRCPolynomial = 10;
+	if (HAL_SPI_Init(&hspi1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+}
+
+/* TIM1 init function */
+void Init::MX_TIM1_Init(void)
+{
+
+	TIM_ClockConfigTypeDef sClockSourceConfig;
+	TIM_MasterConfigTypeDef sMasterConfig;
+	TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
+	TIM_OC_InitTypeDef sConfigOC;
+
+	htim1.Instance = TIM1;
+	htim1.Init.Prescaler = 6 - 1;
+	htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim1.Init.Period = PwmStepCount - 1;
+	htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htim1.Init.RepetitionCounter = 0;
+	if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+	if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+	sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+	sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+	sBreakDeadTimeConfig.DeadTime = 0;
+	sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+	sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+	sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+	if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	sConfigOC.OCMode = TIM_OCMODE_PWM1;
+	sConfigOC.Pulse = 70;
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+	sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	HAL_TIM_MspPostInit(&htim1);
+
+}
+
+/* USART1 init function */
+void Init::MX_USART1_UART_Init(void)
+{
+
+	huart1.Instance = USART1;
+	huart1.Init.BaudRate = 115200;
+	huart1.Init.WordLength = UART_WORDLENGTH_8B;
+	huart1.Init.StopBits = UART_STOPBITS_1;
+	huart1.Init.Parity = UART_PARITY_NONE;
+	huart1.Init.Mode = UART_MODE_TX_RX;
+	huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+	if (HAL_LIN_Init(&huart1, UART_LINBREAKDETECTLENGTH_10B) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+}
+
+/* USART2 init function */
+void Init::MX_USART2_UART_Init(void)
+{
+
+	huart2.Instance = USART2;
+	huart2.Init.BaudRate = 115200;
+	huart2.Init.WordLength = UART_WORDLENGTH_8B;
+	huart2.Init.StopBits = UART_STOPBITS_1;
+	huart2.Init.Parity = UART_PARITY_NONE;
+	huart2.Init.Mode = UART_MODE_TX_RX;
+	huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+	if (HAL_UART_Init(&huart2) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+}
+
+/* WWDG init function */
+void Init::MX_WWDG_Init(void)
+{
+
+	hwwdg.Instance = WWDG;
+	hwwdg.Init.Prescaler = WWDG_PRESCALER_1;
+	hwwdg.Init.Window = 64;
+	hwwdg.Init.Counter = 64;
+	if (HAL_WWDG_Init(&hwwdg) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+}
+
+/** Configure pins as
+* Analog
+* Input
+* Output
+* EVENT_OUT
+* EXTI
+*/
+void Init::MX_GPIO_Init(void)
+{
+
+	/* GPIO Ports Clock Enable */
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+	__HAL_RCC_GPIOD_CLK_ENABLE();
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+
+
+	GPIO_InitTypeDef  GPIO_InitStruct;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+
+	GPIO_InitStruct.Pin = GPIO_PIN_13 | GPIO_PIN_14;
+	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+	GPIO_InitStruct.Pin = GPIO_PIN_10 | GPIO_PIN_11;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	GPIOA->BRR = GPIO_PIN_10 | GPIO_PIN_11;
+}
+
+/**
+* @brief  This function is executed in case of error occurrence.
+* @param  None
+* @retval None
+*/
+void Error_Handler(void)
+{
+	/* USER CODE BEGIN Error_Handler */
+	/* User can add his own implementation to report the HAL error return state */
+	while (1)
+	{
+	}
+	/* USER CODE END Error_Handler */
+}
+
+#ifdef USE_FULL_ASSERT
+
+/**
+* @brief Reports the name of the source file and the source line number
+* where the assert_param error has occurred.
+* @param file: pointer to the source file name
+* @param line: assert_param error line source number
+* @retval None
+*/
+void assert_failed(uint8_t* file, uint32_t line)
+{
+	/* USER CODE BEGIN 6 */
+	/* User can add his own implementation to report the file name and line number,
+	ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+	/* USER CODE END 6 */
+
+}
+
+#endif
+
+/**
+* @}
+*/
+
+/**
+* @}
+*/
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -22,20 +22,26 @@
     <None Include="STM32F103C8T6.ld" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\stm32f10x_it.c">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\motor.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="src\init.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\motor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stm32f1xx_hal_msp.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stm32f1xx_it.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc\includes.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="inc\init.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -45,13 +51,16 @@
     <ClInclude Include="inc\motor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="inc\includes.h">
+    <ClInclude Include="inc\mxconstants.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="inc\stm32f10x_conf.h">
+    <ClInclude Include="inc\stm32f1xx_hal_conf.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="inc\stm32f10x_it.h">
+    <ClInclude Include="inc\stm32f1xx_it.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\stm32f1xx_hal_msp.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
